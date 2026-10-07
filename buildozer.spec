@@ -1,30 +1,22 @@
 [app]
-title = PyIDE
-package.name = pyide
-package.domain = org.pyide
-
+title = YUTUFY
+package.name = yutufy
+package.domain = org.ridho
 source.dir = .
-source.include_exts = py,png,jpg,kv,atlas,json,txt
+source.include_exts = py,png,jpg,kv,atlas,json
+version = 1.0
 
-version = 0.1
-
-# Library Python yang ikut dibundel ke APK.
-# Tambah library lain di sini (dipisah koma) sebelum build.
-requirements = python3==3.11.5,hostpython3==3.11.5,kivy==2.3.0,pygments
+requirements = python3,kivy==2.3.0,pyjnius,yt-dlp,certifi,openssl,requests,urllib3,idna,charset-normalizer,brotli,websockets
 
 orientation = portrait
 fullscreen = 0
 
-android.permissions = INTERNET,READ_EXTERNAL_STORAGE,WRITE_EXTERNAL_STORAGE
+android.permissions = INTERNET, WAKE_LOCK, ACCESS_NETWORK_STATE, ACCESS_WIFI_STATE
 android.api = 33
-android.minapi = 21
-android.ndk = 25b
-android.archs = arm64-v8a
+android.minapi = 24
+android.archs = arm64-v8a, armeabi-v7a
 android.accept_sdk_license = True
 android.allow_backup = True
-
-# Kunci versi python-for-android agar tidak memakai Python 3.14
-p4a.branch = v2024.01.21
 
 [buildozer]
 log_level = 2
