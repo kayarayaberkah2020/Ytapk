@@ -1,0 +1,19 @@
+      - name: Build debug APK
+        run: |
+          set +e
+          buildozer -v android debug 2>&1 | tee build.log
+          code=${PIPESTATUS[0]}
+          if [ $code -ne 0 ]; then
+            echo "===== BARIS ERROR ====="
+            grep -n -iE "error|traceback|failed|not found|no matching" build.log | grep -v ENVIRONMENT | tail -40
+            echo "===== 60 BARIS SEBELUM 'Command failed' ====="
+            grep -n "Command failed" build.log | head -1 | cut -d: -f1 | xargs -I{} sh -c 'sed -n "$(( {} - 60 )),{}p" build.log'
+          fi
+          exit $code
+
+      - name: Upload log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log
+          path: build.log
