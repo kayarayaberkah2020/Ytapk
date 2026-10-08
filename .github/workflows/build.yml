@@ -1,45 +1,19 @@
-name: Build APK
-
-on:
-  workflow_dispatch:
-  push:
-    branches: [ main ]
-
-jobs:
-  build:
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
-
-      - name: Install system dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y git zip unzip openjdk-17-jdk autoconf libtool \
-            pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 \
-            cmake libffi-dev libssl-dev
-
-      - name: Install buildozer
-        run: |
-          pip install --upgrade pip
-          pip install buildozer "cython<3"
-
-      - name: Cache buildozer
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.buildozer
-            .buildozer
-          key: buildozer-${{ hashFiles('buildozer.spec') }}
-
       - name: Build debug APK
-        run: buildozer -v android debug
+        run: |
+          set +e
+          buildozer -v android debug 2>&1 | tee build.log
+          code=${PIPESTATUS[0]}
+          if [ $code -ne 0 ]; then
+            echo "===== BARIS ERROR ====="
+            grep -n -iE "error|traceback|failed|not found|no matching" build.log | grep -v ENVIRONMENT | tail -40
+            echo "===== 60 BARIS SEBELUM 'Command failed' ====="
+            grep -n "Command failed" build.log | head -1 | cut -d: -f1 | xargs -I{} sh -c 'sed -n "$(( {} - 60 )),{}p" build.log'
+          fi
+          exit $code
 
-      - name: Upload APK
+      - name: Upload log
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: yutufy-apk
-          path: bin/*.apk
+          name: build-log
+          path: build.log
